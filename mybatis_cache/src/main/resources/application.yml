@@ -1,0 +1,18 @@
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/june_db?useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: wnsgml12
+
+mybatis:
+  type-aliases-package: com.example.mybatis_cache.entity
+  mapper-locations: classpath:mapper/*.xml
+
+logging:
+  level:
+    com.example.mybatis_cache: debug
+    org.mybatis.spring: DEBUG
+    org.apache.ibatis: DEBUG
+    jdbc.sqlonly: TRACE
