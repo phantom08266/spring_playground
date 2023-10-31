@@ -3,6 +3,7 @@ package com.example.springboot_querydsl;
 import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.Team;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static com.example.springboot_querydsl.entity.QMember.member;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -78,12 +81,25 @@ class QueryDslBasicTest {
 
     @Test
     void aliasTest() {
-        QMember m = QMember.member; // 이미 만들어진 객체를 사용할 수 있다. JPQL쿼리를 보면 member1으로 alias되는 것을 확인할 수 있다.
+        QMember m = member; // 이미 만들어진 객체를 사용할 수 있다. JPQL쿼리를 보면 member1으로 alias되는 것을 확인할 수 있다.
         // 따라서 같은 테이블을 조인할때에는 alias를 다르게 설정하기 위해서만 new QMember("m")을 사용하고 나머지는 static import를 사용하는 것이 깔끔하다.
         Member findMember = query
                 .select(m)
                 .from(m)
                 .where(m.username.eq("member1")) // 파라미터 바인딩 처리가 되어있어 SQL INJECTION 공격을 방어할 수 있다.
                 .fetchOne();
+    }
+
+    @Test
+    void basicQueryTest() {
+        List<Member> findMembers = query
+                .select(member)
+                .from(member)
+                .where(
+                        member.username.ne("member1"), // .and를 사용하지 않아도 모두 and 조건을 사용할 경우 이렇게 컴마(,)로도 처리할 수 있다.
+                        member.age.between(10, 30)
+                ).fetch();
+
+        assertThat(findMembers.size()).isEqualTo(2);
     }
 }
