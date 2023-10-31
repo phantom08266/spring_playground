@@ -75,4 +75,15 @@ class QueryDslBasicTest {
 
         assertThat(findMember.getAge()).isEqualTo(10);
     }
+
+    @Test
+    void aliasTest() {
+        QMember m = QMember.member; // 이미 만들어진 객체를 사용할 수 있다. JPQL쿼리를 보면 member1으로 alias되는 것을 확인할 수 있다.
+        // 따라서 같은 테이블을 조인할때에는 alias를 다르게 설정하기 위해서만 new QMember("m")을 사용하고 나머지는 static import를 사용하는 것이 깔끔하다.
+        Member findMember = query
+                .select(m)
+                .from(m)
+                .where(m.username.eq("member1")) // 파라미터 바인딩 처리가 되어있어 SQL INJECTION 공격을 방어할 수 있다.
+                .fetchOne();
+    }
 }
