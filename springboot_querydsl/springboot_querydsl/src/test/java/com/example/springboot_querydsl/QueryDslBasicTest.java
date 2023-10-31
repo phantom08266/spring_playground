@@ -2,7 +2,9 @@ package com.example.springboot_querydsl;
 
 import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
+import com.example.springboot_querydsl.entity.QTeam;
 import com.example.springboot_querydsl.entity.Team;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +16,7 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
+import static com.example.springboot_querydsl.entity.QTeam.team;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -24,6 +27,7 @@ class QueryDslBasicTest {
     EntityManager em;
 
     JPAQueryFactory query;
+
     @BeforeEach
     void setUp() {
         query = new JPAQueryFactory(em); // 멀티스레드 환경에서 사용할 할 수 있도록 트랜젝션 단위로 바인딩 될 수 있도록 설계되어있다.
@@ -147,6 +151,7 @@ class QueryDslBasicTest {
 
     @Test
     void pagingTest() {
+        // JPQL에서는 페이징 처리하는 쿼리를 볼 수 없지만 실제 쿼리부분을 보면 정상적으로 페이징 쿼리가 날라가는 것을 확인할 수 있다.
         List<Member> findMembers = query.selectFrom(member)
                 .orderBy(member.age.desc()) // 당연히 페이징 처리를 하기 위해서는 정렬을 먼저 시킨 후 처리해야 한다.
                 .offset(1) // 몇번째 부터 시작할 것인지
@@ -154,5 +159,49 @@ class QueryDslBasicTest {
                 .fetch();
 
         assertThat((findMembers)).hasSize(2);
+    }
+
+    @Test
+    void aggregationTest() {
+        List<Tuple> findMembers = query.select(
+                        member.count(),
+                        member.age.sum(),
+                        member.age.avg(),
+                        member.age.min(),
+                        member.age.max()
+                )
+                .from(member)
+                .fetch();
+
+        Tuple tuple = findMembers.get(0);
+
+        assertThat(tuple.get(member.count())).isEqualTo(4);
+        assertThat(tuple.get(member.age.sum())).isEqualTo(100);
+        assertThat(tuple.get(member.age.avg())).isEqualTo(25);
+        assertThat(tuple.get(member.age.max())).isEqualTo(40);
+        assertThat(tuple.get(member.age.min())).isEqualTo(10);
+    }
+
+    // 팀의 이름과 각 팀의 평균 연령을 구해라.
+    @Test
+    void aggregationTest2() {
+        List<Tuple> findMember = query
+                .select(
+                        team.name,
+                        member.age.avg()
+                )
+                .from(member)
+                .join(member.team, team)
+                .groupBy(team.name)
+                .fetch();
+
+        Tuple teamA = findMember.get(0);
+        Tuple teamB = findMember.get(1);
+
+        assertThat(teamA.get(team.name)).isEqualTo("teamA");
+        assertThat(teamA.get(member.age.avg())).isEqualTo(15);
+
+        assertThat(teamB.get(team.name)).isEqualTo("teamB");
+        assertThat(teamB.get(member.age.avg())).isEqualTo(35);
     }
 }
