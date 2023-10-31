@@ -124,4 +124,24 @@ class QueryDslBasicTest {
         query.selectFrom(member)
                 .fetchFirst();
     }
+
+    @Test
+    void sortTest() {
+        em.persist(new Member(null, 100));
+        em.persist(new Member("member5", 105));
+        em.persist(new Member("member6", 106));
+
+        List<Member> findMembers = query.selectFrom(member)
+                .where(member.age.goe(100))
+                .orderBy(member.age.desc(), member.username.asc().nullsLast())
+                .fetch();
+
+        Member member6 = findMembers.get(0);
+        Member member5 = findMembers.get(1);
+        Member memberNull = findMembers.get(2);
+
+        assertThat(member6.getUsername()).isEqualTo("member6");
+        assertThat(member5.getUsername()).isEqualTo("member5");
+        assertThat(memberNull.getUsername()).isNull();
+    }
 }
