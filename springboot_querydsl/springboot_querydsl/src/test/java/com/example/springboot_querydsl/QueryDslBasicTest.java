@@ -144,4 +144,15 @@ class QueryDslBasicTest {
         assertThat(member5.getUsername()).isEqualTo("member5");
         assertThat(memberNull.getUsername()).isNull();
     }
+
+    @Test
+    void pagingTest() {
+        List<Member> findMembers = query.selectFrom(member)
+                .orderBy(member.age.desc()) // 당연히 페이징 처리를 하기 위해서는 정렬을 먼저 시킨 후 처리해야 한다.
+                .offset(1) // 몇번째 부터 시작할 것인지
+                .limit(2) // 몇개를 가져올 것인지
+                .fetch();
+
+        assertThat((findMembers)).hasSize(2);
+    }
 }
