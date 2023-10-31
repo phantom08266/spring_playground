@@ -3,7 +3,6 @@ package com.example.springboot_querydsl;
 import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.Team;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import javax.persistence.EntityManager;
 import java.util.List;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -100,6 +98,30 @@ class QueryDslBasicTest {
                         member.age.between(10, 30)
                 ).fetch();
 
-        assertThat(findMembers.size()).isEqualTo(2);
+        assertThat(findMembers).hasSize(2);
+    }
+
+    @Test
+    void resultFetchTest() {
+        // querydsl 5.0.0부터는 fetchCount, fetchResults가 deprecated되었다. 이유는 복잡한 쿼리일 경우 정확한 결과를 반환하지 않는다고 한다.
+        // 따라서 직접 쿼리를 작성해서 별도의 count 등을 구하는 것이 좋다. 페이징 처리를 할때 사용하려고 했는데 deprecated되었기 때문에 사용하지 않는 것이 좋겠다.
+        query.selectFrom(member)
+                .fetchCount();
+
+        query.selectFrom(member)
+                .fetchResults();
+
+        // List를 반환한다. 주로 많이 사용할 것 같음.
+        List<Member> fetch = query.selectFrom(member)
+                .fetch();
+
+        // 단건을 반환하며, 없으면 null을 반환하고 2개 이상이면 NonUniqueResultException이 발생된다.
+        query.selectFrom(member)
+                .where(member.age.goe(40))
+                .fetchOne();
+
+        // limit(1).fetchOne()과 같다.
+        query.selectFrom(member)
+                .fetchFirst();
     }
 }
