@@ -5,6 +5,7 @@ import com.example.springboot_querydsl.dto.UserDto5;
 import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.Team;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.annotations.QueryProjection;
 import com.querydsl.core.types.Expression;
@@ -644,6 +645,7 @@ class QueryDslBasicTest {
                     '}';
         }
     }
+
     @Test
     void subQueryProjectionTest() {
         QMember subMember = new QMember("subMember");
@@ -681,5 +683,34 @@ class QueryDslBasicTest {
         }
     }
 
+    @Test
+    void dynamicQuery_booleanBuilderTest() {
+        String username = "member1";
+        Integer age = 10;
 
+        List<Member> results = searchMember(username, age);
+
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+
+        assertThat(results)
+                .extracting("username")
+                .containsExactly("member1");
+    }
+
+    private List<Member> searchMember(String username, Integer age) {
+        BooleanBuilder builder = new BooleanBuilder();
+        if (username != null) {
+            builder.and(member.username.eq(username));
+        }
+        if (age != null) {
+            builder.and(member.age.eq(age));
+        }
+
+        return query.select(member)
+                .from(member)
+                .where(builder)
+                .fetch();
+    }
 }
