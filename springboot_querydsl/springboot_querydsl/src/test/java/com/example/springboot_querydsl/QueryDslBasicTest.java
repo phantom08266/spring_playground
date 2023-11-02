@@ -10,7 +10,9 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.annotations.QueryProjection;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -27,6 +29,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceUnit;
 import java.util.List;
+import java.util.Objects;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
 import static com.example.springboot_querydsl.entity.QTeam.team;
@@ -712,5 +715,46 @@ class QueryDslBasicTest {
                 .from(member)
                 .where(builder)
                 .fetch();
+    }
+
+
+    @Test
+    void dynamicQuery_whereParam() {
+        String username = "member1";
+        Integer age = 10;
+
+        List<Member> results = searchMember2(username, age);
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+
+        assertThat(results)
+                .extracting("username")
+                .containsExactly("member1");
+    }
+
+    private List<Member> searchMember2(String username, Integer age) {
+        return query
+                .select(member)
+                .from(member)
+                .where(
+                        // 2개의 메서드를 조합해서 하나의 메서드로 만드는 것도 가능하다.
+                        usernameEq(username),
+                        ageEq(age)
+                )
+                .fetch();
+    }
+
+    //BooleanExpression 반환타입을 사용해야 and, or같이 조합해서 사용할 수 있다.
+    private BooleanExpression usernameEq(String username) {
+        if (Objects.isNull(username)) return null;
+
+        return member.username.eq(username);
+    }
+
+    private BooleanExpression ageEq(Integer age) {
+        if (Objects.isNull(age)) return null;
+
+        return member.age.eq(age);
     }
 }
