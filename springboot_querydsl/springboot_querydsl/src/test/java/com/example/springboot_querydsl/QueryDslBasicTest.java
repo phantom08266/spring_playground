@@ -1,9 +1,12 @@
 package com.example.springboot_querydsl;
 
+import com.example.springboot_querydsl.dto.QUserDto5;
+import com.example.springboot_querydsl.dto.UserDto5;
 import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.Team;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.annotations.QueryProjection;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
@@ -662,4 +665,21 @@ class QueryDslBasicTest {
             System.out.println("result = " + result);
         }
     }
+
+    @Test
+    void queryProjectionTest() {
+        // 이렇게 DTO생성자에 @QueryProejection을 사용하면 Q파일이 생성된 뒤 생성자 매핑을 사용할 수 있다.
+        // 장점은 컴파일 시점에 파라미터 갯수나 타입 등을 체크할 수 있다.
+        // 단점은 DTO가 QueryDSL에 의존적이게 된다.
+        List<UserDto5> results = query
+                .select(new QUserDto5(member.username, member.age))
+                .from(member)
+                .fetch();
+
+        for (UserDto5 result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+
 }
