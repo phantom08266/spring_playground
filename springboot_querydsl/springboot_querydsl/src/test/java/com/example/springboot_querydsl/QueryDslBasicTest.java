@@ -208,6 +208,7 @@ class QueryDslBasicTest {
 
     @Test
     void joinTest() {
+        // join, leftJoin, rightJoin 사용할 수 있다.
         List<Member> findMembers = query
                 .selectFrom(member)
                 .leftJoin(member.team, team)
@@ -240,5 +241,58 @@ class QueryDslBasicTest {
         assertThat(result)
                 .extracting("username")
                 .containsExactly("teamA", "teamB");
+    }
+
+    /**
+     * on절을 사용한 조인 방법(JPA 2.1부터 지원함)
+     * 1. 조인 대상을 필터링할때 사용한다.
+     * 2. 연관관계 없는 엔티티 외부 조인
+     */
+    @Test
+    void onJoinTest() {
+//        회원과 팀을 조인하면서, 팀 이름이 teamA인 팀만 조인, 회원은 모두 조회
+        List<Tuple> results = query
+                .select(member, team) // select절에 여러 엔티티를 선택하면 Tuple로 반환한다.
+                .from(member)
+                .leftJoin(member.team, team) // leftJoin을 사용하기 때문에 on절을 사용한 것임. 만약 teamA에 속한 회원만 조회를 원한다면 innerJoin을 사용해서 where절에 조건을 다는것도 좋은 방법이다.
+                .on(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void onJoinTest2() {
+        List<Tuple> results = query
+                .select(member, team)
+                .from(member)
+                .join(member.team, team)
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void onJoinNoRelationTest() {
+        // 회원의 이름과 팀 이름이 같은 대상 외부조인
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+
+        // join절을 보면 일반 조인과 다르게 하나의 엔티티만 들어가는 것을 확인할 수 있다. 이게 연관관계 없는 엔티티를 on절을 사용한 외부조인을 사용할때 사용하는 방법이다.
+        List<Tuple> results = query
+                .select(member, team)
+                .from(member)
+                .join(team)
+                .on(member.username.eq(team.name)) // hibernate 5.1부터 on절을 사용해서 연관관계가 없는 엔티티를 외부 조인하는 기능이 추가되었다.(당근 내부조인도 가능함)
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
     }
 }
