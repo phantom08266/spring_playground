@@ -757,4 +757,73 @@ class QueryDslBasicTest {
 
         return member.age.eq(age);
     }
+
+    @Test
+    void bulkTest() {
+        List<Member> origin = query.selectFrom(member)
+                .fetch();
+        System.out.println("======변경 전======");
+        for (Member result : origin) {
+            System.out.println("result = " + result);
+        }
+
+        long count = query
+                .update(member)
+                .set(member.username, "비회원")
+                .set(member.age, 30)
+                .where(member.age.lt(28))
+                .execute();
+        System.out.println("update count = " + count);
+
+        // 벌크연산은 1차캐시의 데이터는 변경하지 않고 DB에만 반영한다.
+        // 이미 1차캐시에 저장되어있는 entity데이터는 select연산으로 가져와도 DB의 데이터를 변경하지 않고 1차 캐시의 데이터를 우선시 하여 조회한 데이터를 버린다. 따라서 1차 캐시의 데이터를 변경하고 싶다면 Flush후 Clear해줘야 한다.
+        em.flush();
+        em.clear();
+
+        List<Member> results = query.selectFrom(member)
+                .fetch();
+        System.out.println("======변경 후======");
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void updateAddTest() {
+        // 이것도 마찬가지로 1차 캐시에는 저장되지 않음. 1차 캐시로 저장하기 위해서는 Dirty Checking을 사용해야 한다.
+        long count = query
+                .update(member)
+                .set(member.username, member.username.concat("_").concat(member.age.stringValue()))
+                .where(member.age.eq(10))
+                .execute();
+
+        System.out.println("update count = " + count);
+
+        List<Member> results = query.selectFrom(member)
+                .fetch();
+
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void dirtyCheckingTest() {
+        Member findMember = query
+                .selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        // dirty checking으로 변경해야 하나의 엔티티만 변경되고 1차 캐시에도 변경된 내용을 저장하고 DB에도 저장하여 싱크가 맞게된다.
+        findMember.changeUsername("testname");
+
+        List<Member> results = query.selectFrom(member)
+                .fetch();
+
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+
 }

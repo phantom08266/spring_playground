@@ -40,4 +40,8 @@ public class Member {
         this.team = newTeam;
         newTeam.getMembers().add(this);
     }
+
+    public void changeUsername(String newUsername) {
+        this.username = newUsername;
+    }
 }
