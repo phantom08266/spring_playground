@@ -2,16 +2,11 @@ package com.example.springboot_querydsl;
 
 import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
-import com.example.springboot_querydsl.entity.QTeam;
 import com.example.springboot_querydsl.entity.Team;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.tsv.TsvFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +18,6 @@ import java.util.List;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
 import static com.example.springboot_querydsl.entity.QTeam.team;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
