@@ -17,6 +17,7 @@ import java.util.List;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
 import static com.example.springboot_querydsl.entity.QTeam.team;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -203,5 +204,41 @@ class QueryDslBasicTest {
 
         assertThat(teamB.get(team.name)).isEqualTo("teamB");
         assertThat(teamB.get(member.age.avg())).isEqualTo(35);
+    }
+
+    @Test
+    void joinTest() {
+        List<Member> findMembers = query
+                .selectFrom(member)
+                .leftJoin(member.team, team)
+                .where(team.name.eq("teamA"))
+                .fetch();
+
+        assertThat(findMembers).hasSize(2);
+        assertThat(findMembers)
+                .extracting("username")
+                .containsExactly("member1", "member2");
+    }
+
+    /**
+     * 세타 조인
+     * 회원의 이름이 팀 이륾과 같은 회원 조회
+     */
+    @Test
+    void thetaJoinTest() {
+        em.persist(new Member("teamA"));
+        em.persist(new Member("teamB"));
+
+        // from 절에 여러 엔티티를 선택해서 세타 조인을 사용할 수 있다. 하지만 이럴경우 Left Joint을 같이 사용할 수 없기때문에 on절을 사용하는 것이 좋다.
+        List<Member> result = query
+                .select(member)
+                .from(member, team)
+                .where(member.username.eq(team.name))
+                .fetch();
+
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting("username")
+                .containsExactly("teamA", "teamB");
     }
 }
