@@ -415,4 +415,56 @@ class QueryDslBasicTest {
         }
     }
 
+    @Test
+    void caseTest1() {
+        List<Tuple> results = query
+                .select(member.age,
+                        member.age
+                                .when(10).then("ten")
+                                .when(20).then("twenty")
+                                .otherwise("etc")
+                )
+                .from(member)
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void caseTest2() {
+
+        List<Tuple> results = query.select(member.age,
+                        new CaseBuilder()
+                                .when(member.age.between(0, 10)).then("0~10")
+                                .when(member.age.between(11, 20)).then("11~20")
+                                .when(member.age.between(21, 30)).then("21~30")
+                                .otherwise("etc")
+                ).from(member)
+                .fetch();
+
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+    @Test
+    void caseTest3() {
+        NumberExpression<Integer> rankPath = new CaseBuilder()
+                .when(member.age.between(21, 30)).then(1)
+                .when(member.age.between(0, 20)).then(2)
+                .otherwise(3);
+
+        List<Tuple> results = query.select(member.username,
+                        member.age,
+                        rankPath)
+                .from(member)
+                .orderBy(rankPath.desc())
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
 }
