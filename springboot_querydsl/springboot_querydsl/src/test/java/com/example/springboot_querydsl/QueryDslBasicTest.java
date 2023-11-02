@@ -4,7 +4,9 @@ import com.example.springboot_querydsl.entity.Member;
 import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.Team;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,6 +23,7 @@ import java.util.List;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
 import static com.example.springboot_querydsl.entity.QTeam.team;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -466,5 +469,30 @@ class QueryDslBasicTest {
         for (Tuple result : results) {
             System.out.println("result = " + result);
         }
+    }
+
+    @Test
+    void constantTest() {
+        List<Tuple> results = query.select(member.age,
+                        Expressions.constant("A"))
+                .from(member)
+//                .where(member.username.eq("member1"))
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void constantTest2() {
+        Tuple results = query.select(member.username,
+                        member.age,
+                        member.username.concat("_").concat(member.age.stringValue()))
+                .from(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        System.out.println(results);
     }
 }
