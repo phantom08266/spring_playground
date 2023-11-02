@@ -5,6 +5,8 @@ import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.Team;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
@@ -12,6 +14,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.tsv.TsvFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -452,6 +455,7 @@ class QueryDslBasicTest {
             System.out.println("result = " + result);
         }
     }
+
     @Test
     void caseTest3() {
         NumberExpression<Integer> rankPath = new CaseBuilder()
@@ -494,5 +498,168 @@ class QueryDslBasicTest {
                 .fetchOne();
 
         System.out.println(results);
+    }
+
+    /**
+     * 프로젝션 조회 방법
+     */
+    @Test
+    void baseProjectionTest() {
+        // 프로젝션 대상이 1개인 경우 타입을 명확하게 지정할 수 있다.
+        List<Integer> result = query.select(member.age)
+                .from(member)
+                .fetch();
+    }
+
+    @Test
+    void tupleProjectionTest() {
+        // 프로젝션 대상이 2개 이상인 경우 Tuple 타입으로 조회한다.
+        List<Tuple> results = query.select(member.age, member.username)
+                .from(member)
+                .fetch();
+    }
+
+    public static class UserDto {
+        private String name;
+        private int age;
+
+//        public String getName() {
+//            return name;
+//        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+//        public int getAge() {
+//            return age;
+//        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            return "UserDto{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
+    }
+
+    @Test
+    void dtoBeanProjectionTest() {
+        // bean으로 매핑하기 위해서는 Setter메서드를 이용해서 값을 주입한다.
+        List<UserDto> results = query.select(
+                        Projections.bean(UserDto.class,
+                                member.username.as("name"), // 매핑할 필드이름이 다른경우 as를 사용한다.
+                                member.age))
+                .from(member)
+                .fetch();
+
+        for (UserDto result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+
+    public static class UserDto2 {
+        private String name;
+        private int age;
+
+        @Override
+        public String toString() {
+            return "UserDto2{" +
+                    "name='" + name + '\'' +
+                    ", age='" + age + '\'' +
+                    '}';
+        }
+    }
+
+    @Test
+    void dtoFieldProjectionTest() {
+        // 필드는 Getter, Setter가 없어도 리플랙션을 이용해서 값을 주입한다. 따라서 필드명이 동일해야 한다.
+        List<UserDto2> results = query
+                .select(Projections.fields(UserDto2.class,
+                        member.username.as("name"),
+                        member.age))
+                .from(member)
+                .fetch();
+
+        for (UserDto2 result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    public static class UserDto3 {
+        private String name;
+        private int age;
+
+        public UserDto3(int age, String name) {
+            this.name = name;
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            return "UserDto3{" +
+                    "name='" + name + '\'' +
+                    ", age=" + age +
+                    '}';
+        }
+    }
+
+    @Test
+    void constructorProjectionTest() {
+
+        // 생성자를 이용해서 매핑하는 방법. 이는 생성자 파라미터 타입순으로 매핑되기 때문에 as를 사용하지 않아도 된다.
+        List<UserDto3> results = query
+                .select(
+                        Projections.constructor(
+                                UserDto3.class,
+                                member.age,
+                                member.username)
+                ).from(member)
+                .fetch();
+
+        for (UserDto3 result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+
+    public static class UserDto4 {
+        private String name;
+        private int maxAge;
+
+        @Override
+        public String toString() {
+            return "UserDto4{" +
+                    "name='" + name + '\'' +
+                    ", maxAge=" + maxAge +
+                    '}';
+        }
+    }
+    @Test
+    void subQueryProjectionTest() {
+        QMember subMember = new QMember("subMember");
+
+        // 서브쿼리는 DTO에 매핑하기 위해서는 무조건 ExpressionUtils를 사용할 수 밖에 없다.
+        List<UserDto4> results = query
+                .select(
+                        Projections.fields(
+                                UserDto4.class,
+                                member.username.as("name"),
+                                ExpressionUtils.as(
+                                        JPAExpressions.select(subMember.age.max())
+                                                .from(subMember), "maxAge")
+                        )
+                ).from(member)
+                .fetch();
+
+        for (UserDto4 result : results) {
+            System.out.println("result = " + result);
+        }
     }
 }
