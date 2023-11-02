@@ -5,14 +5,20 @@ import com.example.springboot_querydsl.entity.QMember;
 import com.example.springboot_querydsl.entity.QTeam;
 import com.example.springboot_querydsl.entity.Team;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.tsv.TsvFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnit;
 import java.util.List;
 
 import static com.example.springboot_querydsl.entity.QMember.member;
@@ -289,6 +295,176 @@ class QueryDslBasicTest {
                 .from(member)
                 .join(team)
                 .on(member.username.eq(team.name)) // hibernate 5.1부터 on절을 사용해서 연관관계가 없는 엔티티를 외부 조인하는 기능이 추가되었다.(당근 내부조인도 가능함)
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+
+    @PersistenceUnit
+    EntityManagerFactory emf;
+
+    @Test
+    void fetchJoinNoTest() {
+        em.flush();
+        em.clear();
+
+        Member result = query.selectFrom(member)
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(result.getTeam());
+        assertThat(loaded).as("페치 조인 미적용").isFalse();
+    }
+
+    @Test
+    void fetchJoinUseTest() {
+        em.flush();
+        em.clear();
+
+        Member result = query.select(member)
+                .from(member)
+                .join(member.team, team).fetchJoin()
+                .where(member.username.eq("member1"))
+                .fetchOne();
+
+        boolean loaded = emf.getPersistenceUnitUtil().isLoaded(result.getTeam());
+        assertThat(loaded).as("페치 조인 적용").isTrue();
+    }
+
+
+    /**
+     * 서브쿼리 사용하기
+     */
+    @Test
+    void subQueryTest1() {
+        // 나이가 가장 많은 회원 조회
+        QMember subMember = new QMember("subMember");
+
+        // where절에서 서브쿼리를 사용할 수 있다.
+        List<Member> results = query
+                .selectFrom(member)
+                .where(member.age.eq(
+                        JPAExpressions
+                                .select(subMember.age.max())
+                                .from(subMember)
+                ))
+                .fetch();
+
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+
+        assertThat(results).extracting("age")
+                .containsExactly(40);
+    }
+
+    @Test
+    void subQueryTest2() {
+        // 나이가 평균 이상인 회원
+        QMember subMember = new QMember("subMember");
+
+        List<Member> results = query
+                .selectFrom(member)
+                .where(member.age.goe(
+                        JPAExpressions
+                                .select(subMember.age.avg())
+                                .from(subMember)
+                ))
+                .fetch();
+
+        assertThat(results)
+                .extracting("age")
+                .containsExactly(30, 40);
+    }
+
+    @Test
+    void subQueryTest3() {
+        // in절을 사용한 서브쿼리
+        QMember subMember = new QMember("subMember");
+        List<Member> results = query
+                .selectFrom(member)
+                .where(member.age.in(
+                        JPAExpressions
+                                .select(subMember.age)
+                                .from(subMember)
+                                .where(subMember.age.gt(10))
+                ))
+                .fetch();
+
+        assertThat(results)
+                .extracting("age")
+                .containsExactly(20, 30, 40);
+    }
+
+    // 주의사항으로 서브쿼리는 From절에서는 사용할 수 없다. 이건 JPA의 한계이다. JPQL의 서브쿼리 한계점이다. 당연히 QueryDsl도 지원하지 않는다.
+    @Test
+    void subQueryTest4() {
+        // select절의 서브쿼리
+        QMember subMember = new QMember("subMember");
+
+        List<Tuple> results = query
+                .select(member.username,
+                        JPAExpressions
+                                .select(subMember.age.avg())
+                                .from(subMember)
+                )
+                .from(member)
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void caseTest1() {
+        List<Tuple> results = query
+                .select(member.age,
+                        member.age
+                                .when(10).then("ten")
+                                .when(20).then("twenty")
+                                .otherwise("etc")
+                )
+                .from(member)
+                .fetch();
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void caseTest2() {
+
+        List<Tuple> results = query.select(member.age,
+                        new CaseBuilder()
+                                .when(member.age.between(0, 10)).then("0~10")
+                                .when(member.age.between(11, 20)).then("11~20")
+                                .when(member.age.between(21, 30)).then("21~30")
+                                .otherwise("etc")
+                ).from(member)
+                .fetch();
+
+
+        for (Tuple result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+    @Test
+    void caseTest3() {
+        NumberExpression<Integer> rankPath = new CaseBuilder()
+                .when(member.age.between(21, 30)).then(1)
+                .when(member.age.between(0, 20)).then(2)
+                .otherwise(3);
+
+        List<Tuple> results = query.select(member.username,
+                        member.age,
+                        rankPath)
+                .from(member)
+                .orderBy(rankPath.desc())
                 .fetch();
 
         for (Tuple result : results) {
