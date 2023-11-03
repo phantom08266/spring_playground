@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -83,6 +84,23 @@ class MemberRepositoryTest {
         condition.setAgeLoe(30);
 
         List<MemberTeamDto> members = memberQueryDslRepository.searchByBuilder(condition);
+
+        for (MemberTeamDto member : members) {
+            System.out.println("member = " + member);
+        }
+        assertThat(members).extracting("username")
+                .containsExactly("member1");
+    }
+
+    @Test
+    void memberSearchWhereTest() {
+        setUp();
+
+        MemberSearchCondition condition = new MemberSearchCondition();
+        condition.setUsername("member1");
+        condition.setAgeLoe(30);
+
+        List<MemberTeamDto> members = memberQueryDslRepository.searchByWhere(condition);
 
         for (MemberTeamDto member : members) {
             System.out.println("member = " + member);
