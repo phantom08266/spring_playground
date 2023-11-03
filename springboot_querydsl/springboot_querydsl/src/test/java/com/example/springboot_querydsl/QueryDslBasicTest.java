@@ -826,4 +826,54 @@ class QueryDslBasicTest {
     }
 
 
+    /**
+     * SQL Function만 사용하기
+     * <p>
+     * JPA 와 같이 Dialact에 등록된 함수들만 사용할 수 있다.
+     *  org.hibernate.dialect패키지에 있는 H2Dialect클래스에 선언되어있는 함수들만 지원가능하다.
+     */
+
+    @Test
+    void sqlFunctionTest() {
+        List<String> memberChangeNames = query
+                .select(
+                        Expressions.stringTemplate(
+                                "function('replace', {0}, {1}, {2})",
+                                member.username, "ber", "M")
+                )
+                .from(member)
+                .fetch();
+
+        for (String memberChangeName : memberChangeNames) {
+            System.out.println("memberChangeName = " + memberChangeName);
+        }
+    }
+
+    @Test
+    void sqlFunctionTest2() {
+        List<Member> results = query
+                .selectFrom(member)
+                .where(member.username.eq(
+                        Expressions.stringTemplate("function('lower', {0})", member.username)
+                ))
+                .fetch();
+
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
+    @Test
+    void sqlFunctionTest3() {
+        List<Member> results = query
+                .selectFrom(member)
+                // 이런 기보적인 sql 함수들은 QueryDSL에서도 기본으로지원해준다. (ansi 표준 함수들)
+                .where(member.username.eq(member.username.lower()))
+                .fetch();
+
+        for (Member result : results) {
+            System.out.println("result = " + result);
+        }
+    }
+
 }
