@@ -1,9 +1,11 @@
 package com.example.springboot_querydsl.dto;
 
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @ToString
+@NoArgsConstructor
 public class MemberTeamDto {
     private Long memberId;
     private String username;
