@@ -5,7 +5,6 @@ import com.example.springboot_querydsl.dto.MemberTeamDto;
 import com.example.springboot_querydsl.dto.QMemberTeamDto;
 import com.example.springboot_querydsl.entity.Member;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
