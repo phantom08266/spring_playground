@@ -7,12 +7,15 @@ import com.example.springboot_querydsl.entity.Team;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -69,5 +72,45 @@ class MemberSpringDataJpaRepositoryTest {
         assertThat(results)
                 .extracting("username")
                 .containsExactly("member2", "member3");
+    }
+
+    @Test
+    void searchPageSimpleTest() {
+        setUp();
+        MemberSearchCondition condition = new MemberSearchCondition();
+        PageRequest request = PageRequest.of(0,3);
+        Page<MemberTeamDto> memberTeamDtos = memberSpringDataJpaRepository.searchPageSimple(condition, request);
+
+        assertThat(memberTeamDtos).hasSize(3);
+        assertThat(memberTeamDtos)
+                .extracting("username")
+                .containsExactly("member1", "member2", "member3");
+    }
+
+    @Test
+    void searchPageComplexTest() {
+        setUp();
+        MemberSearchCondition condition = new MemberSearchCondition();
+        PageRequest request = PageRequest.of(0,3);
+        Page<MemberTeamDto> memberTeamDtos = memberSpringDataJpaRepository.searchPageComplex(condition, request);
+
+        assertThat(memberTeamDtos).hasSize(3);
+        assertThat(memberTeamDtos)
+                .extracting("username")
+                .containsExactly("member1", "member2", "member3");
+    }
+
+
+    @Test
+    void searchPageComplexOptimizationTest() {
+        setUp();
+        MemberSearchCondition condition = new MemberSearchCondition();
+        PageRequest request = PageRequest.of(0,5);
+        Page<MemberTeamDto> memberTeamDtos = memberSpringDataJpaRepository.searchPageComplexOptimization(condition, request);
+
+        assertThat(memberTeamDtos).hasSize(4);
+        assertThat(memberTeamDtos)
+                .extracting("username")
+                .containsExactly("member1", "member2", "member3", "member4");
     }
 }
