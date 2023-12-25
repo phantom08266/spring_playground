@@ -6,11 +6,11 @@ spring:
           default:
             connectTimeout: 1000
             readTimeout: 3000
-            loggerLevel: BASIC
-          demo-client: # DemoFeignClient?? ??? Client ?? ?
+            loggerLevel: NONE
+          demo-client: # DemoFeignClient의 name
             connectTimeout: 1000
             readTimeout: 10000
-            loggerLevel: HEADERS # FeignCustomLogger? Logger.Level? ???. (https://docs.spring.io/spring-cloud-openfeign/reference/spring-cloud-openfeign.html)
+            loggerLevel: HEADERS # FeignCustomLogger의 Logger.Level 설정 (https://docs.spring.io/spring-cloud-openfeign/reference/spring-cloud-openfeign.html)
             # Logger.Level
             # NONE  = No logging.
             # BASIC = Log only the request method and URL and the response status code and execution time.
@@ -18,9 +18,9 @@ spring:
             # FULL = Log the headers, body, and metadata for both requests and responses.
 
 
-            # ****??? ??? ??? ?? ??!!! *****
-            # ??? ??? ??? ????? ? ?? SynchronousMethodHandler????? ???? ?? executeAndDecode? ????.
-            # ?? loggerLevel??? None? ????? ?? ??? ??? ??? ??? ?? ?? ??? ???? ??.
+            # ****로그레벨 설정 시 주의 사항!!! *****
+            # 커스텀 Logger를 빈으로 설정한 뒤 SynchronousMethodHandler의 생성자로 주입되어 executeAndDecode메서드로 전달받게 된다.
+            # 이때 loggerLevel이 None으로 되어있으면 커스텀 Logger가 무시되고 기본 로거가 사용된다.
 feign:
   url:
     prefix: http://localhost:8080/server
