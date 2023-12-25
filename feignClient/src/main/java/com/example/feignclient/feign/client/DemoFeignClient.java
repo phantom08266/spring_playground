@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(
-        name = "demo-client",
+        name = "demo-client", // yml에 설정한 service name
         url = "${feign.url.prefix}",
         configuration = DemoFeignConfig.class
 )
