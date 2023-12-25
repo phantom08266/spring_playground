@@ -22,4 +22,9 @@ public class DemoController {
         demoService.create();
     }
 
+    @GetMapping("/error")
+    public void error() {
+        demoService.error();
+    }
+
 }

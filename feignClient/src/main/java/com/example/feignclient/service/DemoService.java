@@ -27,4 +27,9 @@ public class DemoService {
         ResponseEntity<BaseResponseInfo> response = demoFeignClient.create("customHeader", request);
         log.info("response: {}", response);
     }
+
+    public void error() {
+        ResponseEntity<BaseResponseInfo> response = demoFeignClient.error();
+        log.info("response: {}", response);
+    }
 }
