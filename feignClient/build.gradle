@@ -1,0 +1,49 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.1'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+//ext {
+//	// SpringClund는 Springboot  버전별 호환성을 중요시 여기기 때문에 아래 사이트에서 필히 확인해야 한다.
+//	// https://spring.io/projects/spring-cloud/
+//	//Feign
+//	set('springCloudVersion', "2023.0.0")
+//}
+//
+//dependencyManagement {
+//	imports {
+//		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+//	}
+//}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+//	// Feign
+//	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
