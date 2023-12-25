@@ -17,4 +17,9 @@ public class DemoController {
         demoService.callGet();
     }
 
+    @GetMapping("/create")
+    public void create() {
+        demoService.create();
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.example.feignclient.service;
 
+import com.example.feignclient.common.dto.BaseRequestInfo;
 import com.example.feignclient.common.dto.BaseResponseInfo;
 import com.example.feignclient.feign.client.DemoFeignClient;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,15 @@ public class DemoService {
 
     public void callGet() {
         ResponseEntity<BaseResponseInfo> response = demoFeignClient.callGet("customHeader", "name", 10);
+        log.info("response: {}", response);
+    }
+
+    public void create() {
+        BaseRequestInfo request = BaseRequestInfo.builder()
+                .age(20)
+                .name("testName")
+                .build();
+        ResponseEntity<BaseResponseInfo> response = demoFeignClient.create("customHeader", request);
         log.info("response: {}", response);
     }
 }
