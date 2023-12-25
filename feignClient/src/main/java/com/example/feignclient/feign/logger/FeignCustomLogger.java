@@ -15,6 +15,8 @@ import static feign.Util.*;
 @RequiredArgsConstructor
 public class FeignCustomLogger extends Logger {
 
+    private static final long SLOW_API_TIME = 5000;
+
     /**
      * 출력되는 로그 포멧 설정
      * @param configKey value of {@link Feign#configKey(Class, java.lang.reflect.Method)}
@@ -67,6 +69,11 @@ public class FeignCustomLogger extends Logger {
                 if (logLevel.ordinal() >= Level.FULL.ordinal() && bodyLength > 0) {
                     log(configKey, "%s", decodeOrDefault(bodyData, UTF_8, "Binary data"));
                 }
+
+                if (elapsedTime > SLOW_API_TIME) {
+                    log(configKey, "SLOW API CALL (%sms)", elapsedTime);
+                }
+
                 log(configKey, "<--- END HTTP (%s-byte body)", bodyLength);
                 return response.toBuilder().body(bodyData).build();
             } else {
