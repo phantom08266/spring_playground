@@ -27,4 +27,16 @@ public class ServerController {
                 .age(age)
                 .build();
     }
+
+    @PostMapping("/server/post")
+    public BaseResponseInfo post(
+            @RequestHeader("CustomHeaderName") String customHeader,
+            @RequestBody BaseRequestInfo request) {
+
+        return BaseResponseInfo.builder()
+                .header(customHeader)
+                .name(request.getName())
+                .age(request.getAge())
+                .build();
+    }
 }
