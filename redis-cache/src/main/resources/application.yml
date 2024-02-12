@@ -5,3 +5,7 @@ spring:
     hikari:
       username: root
       password: test123
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
