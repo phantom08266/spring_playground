@@ -1,6 +1,5 @@
 /spring-redis-cache/.gradle/*
 /spring-redis-cache/build/*
 /spring-redis-cache/.idea/*
-/spring-redis-cache/src/main/resources
 /feignClient/build/*
 /feignClient/.gradle/*
