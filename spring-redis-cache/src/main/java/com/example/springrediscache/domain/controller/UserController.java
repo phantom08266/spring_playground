@@ -33,4 +33,9 @@ public class UserController {
     public RedisHashUser getRedisHashUser(@PathVariable Long id) {
         return userService.getRedisHashUser(id);
     }
+
+    @GetMapping("/users/redis/cacheable/{id}")
+    public User getCacheableUser(@PathVariable Long id) {
+        return userService.redisCacheableUser(id);
+    }
 }

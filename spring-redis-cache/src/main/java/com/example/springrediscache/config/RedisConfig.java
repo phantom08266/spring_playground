@@ -52,8 +52,10 @@ public class RedisConfig {
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper()
+                // json -> object 시 unknown property가 있어도 에러를 발생시키지 않음
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(new JavaTimeModule())
+                // object -> json 시 변환할 클래스 타입을 같이 저장하도록 설정
                 .activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL)
                 .disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);
 

@@ -5,11 +5,14 @@ import com.example.springrediscache.domain.entity.User;
 import com.example.springrediscache.domain.repository.RedisHashRepository;
 import com.example.springrediscache.domain.repository.UserRespsitory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Objects;
+
+import static com.example.springrediscache.config.CacheConfig.CACHE1;
 
 @Service
 @RequiredArgsConstructor
@@ -65,5 +68,11 @@ public class UserService {
                             );
                 }
         );
+    }
+
+    // CACHE1의 값과 user:id의 값으로 캐싱 아이디 만들어서 저장한다.
+    @Cacheable(cacheNames = CACHE1, key="'user:' + #id")
+    public User redisCacheableUser(Long id) {
+        return userRespsitory.findById(id).orElseThrow();
     }
 }
