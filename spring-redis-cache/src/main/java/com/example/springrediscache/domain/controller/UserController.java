@@ -1,5 +1,6 @@
 package com.example.springrediscache.domain.controller;
 
+import com.example.springrediscache.domain.entity.RedisHashUser;
 import com.example.springrediscache.domain.entity.User;
 import com.example.springrediscache.domain.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,10 @@ public class UserController {
     @GetMapping("/users/redis/object/{id}")
     public User getRedisTemplateObject(@PathVariable Long id) {
         return userService.getRedisTemplateObject(id);
+    }
+
+    @GetMapping("/users/redis/hash/{id}")
+    public RedisHashUser getRedisHashUser(@PathVariable Long id) {
+        return userService.getRedisHashUser(id);
     }
 }
