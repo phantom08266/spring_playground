@@ -22,4 +22,9 @@ public class UserController {
     public User getRedisTemplateUser(@PathVariable Long id) {
         return userService.getRedisTemplateUser(id);
     }
+
+    @GetMapping("/users/redis/object/{id}")
+    public User getRedisTemplateObject(@PathVariable Long id) {
+        return userService.getRedisTemplateObject(id);
+    }
 }
