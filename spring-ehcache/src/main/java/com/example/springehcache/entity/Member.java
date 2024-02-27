@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Builder
 @Getter
 @Entity
-public class Member implements Serializable {
+public class Member extends BaseEntity implements Serializable  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

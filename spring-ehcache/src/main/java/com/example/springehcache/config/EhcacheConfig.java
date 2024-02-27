@@ -25,14 +25,15 @@ public class EhcacheConfig {
         CachingProvider cachingProvider = Caching.getCachingProvider();
         CacheManager cacheManager = cachingProvider.getCacheManager();
 
-        CacheConfiguration<Long, Object> configuration = CacheConfigurationBuilder.newCacheConfigurationBuilder(
-                        Long.class, Object.class,
+        CacheConfiguration<Object, Object> configuration = CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                        Object.class, Object.class,
                         ResourcePoolsBuilder.heap(100) // Define size of heap
                                 .offheap(10, MemoryUnit.MB))
                 .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofMinutes(10)))
                 .build();
-        javax.cache.configuration.Configuration<Long, Object> cacheConfiguration = Eh107Configuration.fromEhcacheCacheConfiguration(configuration);
+        javax.cache.configuration.Configuration<Object, Object> cacheConfiguration = Eh107Configuration.fromEhcacheCacheConfiguration(configuration);
         cacheManager.createCache("allMember", cacheConfiguration);
+        cacheManager.createCache("pageMember", cacheConfiguration);
         return cacheManager;
     }
 
