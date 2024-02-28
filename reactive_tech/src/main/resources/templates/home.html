@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Hacking with Spring boot</title>
@@ -10,5 +10,53 @@
     <p>
         This is a simple web application that demonstrates how to use Spring Boot with Thymeleaf.
     </p>
+
+    <h2>Inventory Management</h2>
+    <table>
+        <thread>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+        </thread>
+        <tbody>
+            <tr th:each="item : ${items}">
+                <td th:text="${item.id}"></td>
+                <td th:text="${item.name}"></td>
+                <td th:text="${item.price}"></td>
+                <td>
+                    <form method="post" th:action="@{'/add/' + ${item.id}}">
+                        <input type="submit" value="Add to cart"/>
+                    </form>
+                </td>
+                <td>
+                    <!--th:action="@{'/delete/ 가 실제 HTML로 랜더링 될때에는 Hidden값이 들어가며 hidden값을 POST로 요청한다.
+                    하지만 이를 DeleteMapping으로 전달하려면 application.yml에 설정해야 한다.(true)-->
+                    <form method="post" th:action="@{'/delete/' + ${item.id}}">
+                        <input type="submit" value="Delete"/>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Cart</h2>
+    <table>
+        <thread>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Quantity</th>
+            </tr>
+        </thread>
+        <tbody>
+            <tr th:each="cartItem : ${cart.cartItems}">
+                <td th:text="${cartItem.item.id}"></td>
+                <td th:text="${cartItem.item.name}"></td>
+                <td th:text="${cartItem.quantity}"></td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>
