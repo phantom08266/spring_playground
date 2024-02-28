@@ -18,6 +18,14 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // 리액티브 MongoDB 스프링 부트 스타터 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    // 리액티브가 아닌 전통적인 몽고디비 드라이버 추가
+    implementation 'org.mongodb:mongodb-driver-sync'
+
+    //내장형 몽고디비 도구(테스트코드를 작성하기 위함)
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'
 }
