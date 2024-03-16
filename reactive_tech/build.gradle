@@ -23,6 +23,10 @@ dependencies {
     // 리액티브가 아닌 전통적인 몽고디비 드라이버 추가
     implementation 'org.mongodb:mongodb-driver-sync'
 
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+
     //내장형 몽고디비 도구(테스트코드를 작성하기 위함)
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 
