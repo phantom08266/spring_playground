@@ -13,9 +13,7 @@ public class CustomExceptionHandler {
     public MethodValidMessage methodValidExceptionHandler(MethodArgumentNotValidException e) {
         MethodValidMessage methodValidMessage = new MethodValidMessage(HttpStatus.BAD_REQUEST.value(), "요청값이 올바르지 않습니다");
 
-        e.getFieldErrors().forEach(error -> {
-            methodValidMessage.addDetail(error.getField(), error.getDefaultMessage());
-        });
+        e.getFieldErrors().forEach(error -> methodValidMessage.addDetail(error.getField(), error.getDefaultMessage()));
         return methodValidMessage;
     }
 }
