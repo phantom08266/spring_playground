@@ -8,16 +8,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
 
-    @PostMapping("/api/posts")
+    @PostMapping("/posts")
     public PostVo create(@RequestBody @Valid CreatePost request) {
         log.info("[PostController] request: {}", request);
         PostVo post = postService.create(request.getTitle(), request.getContent());
